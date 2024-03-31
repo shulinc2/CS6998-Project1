@@ -110,6 +110,7 @@ def main():
         ngpus_per_node = torch.cuda.device_count()
     else:
         ngpus_per_node = 1
+    
     if args.multiprocessing_distributed:
         # Since we have ngpus_per_node processes per node, the total world_size
         # needs to be adjusted accordingly
@@ -328,21 +329,15 @@ def train(train_loader, model, criterion, optimizer, epoch, device, args):
         
         profiler.start()
         # compute output
- #       print(model)
- #       summary(model, input_size=(3,224,224))
         output = model(images)
         loss = criterion(output, target)
 
         # measure accuracy and record loss
-        #acc1, acc5 = accuracy(output, target, topk=(1, 5))
         losses.update(loss.item(), images.size(0))
-        #top1.update(acc1[0], images.size(0))
-        #top5.update(acc5[0], images.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
-        loss.backward()
-        
+        loss.backward()        
         profiler.stop()
         optimizer.step()
 
@@ -365,9 +360,6 @@ def validate(val_loader, model, criterion, args):
                 i = base_progress + i
                 if args.gpu is not None and torch.cuda.is_available():
                     images = images.cuda(args.gpu, non_blocking=True)
-                #if torch.backends.mps.is_available():
-                 #   images = images.to('mps')
-                  #  target = target.to('mps')
                 if torch.cuda.is_available():
                     target = target.cuda(args.gpu, non_blocking=True)
 
@@ -376,10 +368,8 @@ def validate(val_loader, model, criterion, args):
                 loss = criterion(output, target)
 
                 # measure accuracy and record loss
-                #acc1, acc5 = accuracy(output, target, topk=(1, 5))
+
                 losses.update(loss.item(), images.size(0))
-                #top1.update(acc1[0], images.size(0))
-                #top5.update(acc5[0], images.size(0))
 
                 # measure elapsed time
                 batch_time.update(time.time() - end)
